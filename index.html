@@ -17,7 +17,7 @@ body {
   margin: 20px auto;
   position: relative;
 
-  /* ⭐⭐⭐ 這裡放你的「無籽西瓜圖片」 ⭐⭐⭐ */
+  /* ⭐⭐⭐ ① 在這裡換「無籽西瓜圖片」 ⭐⭐⭐ */
   background-image: url("https://i.meee.com.tw/8WJF4zu.png");
 
   background-size: cover;
@@ -26,12 +26,12 @@ body {
   overflow: hidden;
 }
 
-/* ===== 籽（用圖片）===== */
+/* ===== 籽 ===== */
 .seed {
   width: 16px;
   height: 22px;
 
-  /* ⭐⭐⭐ 這裡放「西瓜籽PNG（透明背景）」 ⭐⭐⭐ */
+  /* ⭐⭐⭐ ② 在這裡換「籽 PNG 圖」 ⭐⭐⭐ */
   background-image: url("https://i.meee.com.tw/r17sw0F.png");
 
   background-size: contain;
@@ -43,62 +43,73 @@ body {
   transition: transform 0.2s ease, opacity 0.3s ease;
 }
 
-/* 點擊效果（比較像拿掉） */
 .seed.removing {
   transform: scale(0.3);
   opacity: 0;
+}
+
+button {
+  padding: 8px 16px;
+  font-size: 16px;
+  cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<h2>討伐西瓜籽！把所有西瓜籽挖出來吧！</h2>
+<h2>討伐西瓜籽 🍉</h2>
 
 <div id="melon"></div>
+
 <p id="msg"></p>
+
+<button onclick="startGame()">重新開始</button>
 
 <script>
 const melon = document.getElementById("melon");
 const msg = document.getElementById("msg");
 
-/* ⭐ 控制籽數量（建議先少） */
-let total = 5;
+let total = 8;   // ⭐籽數量（可自己改）
 let removed = 0;
 
-/* ⭐ 籽的位置（手動放，比亂數更穩） */
-const positions = [
-  {top: 60, left: 120},
-  {top: 100, left: 200},
-  {top: 140, left: 80},
-  {top: 90, left: 160},
-  {top: 130, left: 220}
-];
+/* ===== 隨機生成籽 ===== */
+function startGame() {
+  melon.innerHTML = "";
+  removed = 0;
+  msg.innerText = "";
 
-positions.slice(0, total).forEach(pos => {
-  let seed = document.createElement("div");
-  seed.className = "seed";
+  for (let i = 0; i < total; i++) {
+    let seed = document.createElement("div");
+    seed.className = "seed";
 
-  seed.style.top = pos.top + "px";
-  seed.style.left = pos.left + "px";
+    // ⭐隨機位置（限制在西瓜內）
+    let top = Math.random() * 180 + 10;
+    let left = Math.random() * 280 + 10;
 
-  seed.onclick = () => {
-    /* 加上「拿掉動畫」 */
-    seed.classList.add("removing");
+    seed.style.top = top + "px";
+    seed.style.left = left + "px";
 
-    setTimeout(() => {
-      seed.remove();
-    }, 300);
+    seed.onclick = () => {
+      seed.classList.add("removing");
 
-    removed++;
+      setTimeout(() => {
+        seed.remove();
+      }, 300);
 
-    if (removed === total) {
-      msg.innerText = "討伐完畢 ✔ 不要再想了";
-    }
-  };
+      removed++;
 
-  melon.appendChild(seed);
-});
+      if (removed === total) {
+        msg.innerText = "討伐完畢 ✔ 有舒服一點了嗎";
+      }
+    };
+
+    melon.appendChild(seed);
+  }
+}
+
+/* 初始啟動 */
+startGame();
 </script>
 
 </body>
