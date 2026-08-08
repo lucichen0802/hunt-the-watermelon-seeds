@@ -1,26 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>討伐西瓜籽！</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>討伐西瓜籽 🍉</title>
 
 <style>
-body {
-  text-align: center;
-  font-family: sans-serif;
 
-  /* ⭐ 背景顏色（可改） */
-  background: #fff8f2;
+/* ===== 🌈 可自訂區（你可以改這些） ===== */
+:root {
+  --bg-color: #f4f1ec;          /* ⭐ 背景顏色 */
+  --btn-color: #ff6b6b;         /* ⭐ 按鈕顏色 */
+  --btn-text: #ffffff;          /* ⭐ 按鈕文字顏色 */
 }
 
-/* ===== 西瓜容器 ===== */
+/* ===== 基本 ===== */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: var(--bg-color);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 100vh;
+}
+
+/* ===== 標題 ===== */
+h2 {
+  margin-top: 10px;
+}
+
+/* ===== 西瓜區 ===== */
 #melon {
-  width: 300px;
-  height: 300px;
-  margin: 20px auto;
+  width: 90vw;               /* ⭐ 手機自適應 */
+  max-width: 420px;
+  aspect-ratio: 1/1;
+
   position: relative;
 
-  /* ⭐⭐⭐ 換成你的「西瓜底圖」 ⭐⭐⭐ */
+  /* ⭐⭐⭐ 換你的「西瓜底圖」 ⭐⭐⭐ */
   background-image: url("https://i.meee.com.tw/FjnTuaO.jpg");
 
   background-size: cover;
@@ -32,10 +54,10 @@ body {
 
 /* ===== 籽 ===== */
 .seed {
-  width: 22px;
-  height: 28px;
+  width: 20px;
+  height: 26px;
 
-  /* ⭐⭐⭐ 換成你的「籽圖片」 ⭐⭐⭐ */
+  /* ⭐⭐⭐ 換你的「籽圖片（透明PNG）」 ⭐⭐⭐ */
   background-image: url("https://i.meee.com.tw/r17sw0F.png");
 
   background-size: contain;
@@ -44,30 +66,37 @@ body {
   position: absolute;
   cursor: pointer;
 
-  /* 手機更好點 */
-  transform: translate(-50%, -50%);
-
-  transition: transform 0.25s ease, opacity 0.3s ease;
+  transition: transform 0.2s;
 }
 
-/* 挖掉動畫 */
+/* 點擊動畫 */
 .seed.removing {
-  transform: translate(-50%, -50%) scale(0.2) rotate(20deg);
-  opacity: 0;
+  animation: pop 0.3s forwards;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(0); opacity: 0; }
 }
 
 /* ===== UI ===== */
-button {
-  padding: 10px 16px;
-  font-size: 16px;
+#ui {
   margin-top: 10px;
-
-  /* ⭐ 按鈕顏色可改 */
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  border-radius: 8px;
 }
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+
+  background: var(--btn-color);
+  color: var(--btn-text);
+
+  font-size: 16px;
+}
+
 </style>
 </head>
 
@@ -77,64 +106,72 @@ button {
 
 <div id="melon"></div>
 
-<p id="msg"></p>
-<p id="timer"></p>
-
-<button onclick="startGame()">重新開始</button>
-
-<!-- ⭐⭐⭐ 音效（可換）⭐⭐⭐ -->
-<audio id="popSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b9b61.mp3"></audio>
+<div id="ui">
+  <div>⏱ 時間：<span id="time">0.0</span> 秒</div>
+  <div>🎯 分數：<span id="score">0</span></div>
+  <button onclick="startGame()">重新開始</button>
+</div>
 
 <script>
+
 const melon = document.getElementById("melon");
-const msg = document.getElementById("msg");
-const timerText = document.getElementById("timer");
-const sound = document.getElementById("popSound");
+const timeText = document.getElementById("time");
+const scoreText = document.getElementById("score");
 
-let total = 8;   // ⭐ 籽數量可改
+/* ===== 可調整 ===== */
+const TOTAL_SEEDS = 10;   // ⭐ 籽數量
+
 let removed = 0;
-let startTime;
+let timer = 0;
+let interval;
 
-/* ===== 隨機位置（不會跑出去）===== */
-function getRandomPosition() {
-  const padding = 40; // ⭐ 越大越不靠邊
-  const x = Math.random() * (300 - padding * 2) + padding;
-  const y = Math.random() * (300 - padding * 2) + padding;
-  return { x, y };
-}
+/* ===== 音效（啵） ===== */
+const popSound = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c8b0f9d8f1.mp3");
 
-/* ===== 建立籽 ===== */
-function createSeeds() {
+/* ===== 開始遊戲 ===== */
+function startGame() {
   melon.innerHTML = "";
   removed = 0;
+  timer = 0;
+  scoreText.innerText = 0;
 
-  for (let i = 0; i < total; i++) {
+  clearInterval(interval);
+  interval = setInterval(() => {
+    timer += 0.1;
+    timeText.innerText = timer.toFixed(1);
+  }, 100);
+
+  generateSeeds();
+}
+
+/* ===== 生成籽（隨機 + 不超出） ===== */
+function generateSeeds() {
+  const size = melon.clientWidth;
+
+  for (let i = 0; i < TOTAL_SEEDS; i++) {
     let seed = document.createElement("div");
     seed.className = "seed";
 
-    const pos = getRandomPosition();
-    seed.style.left = pos.x + "px";
-    seed.style.top = pos.y + "px";
+    let x = Math.random() * (size - 30);
+    let y = Math.random() * (size - 30);
+
+    seed.style.left = x + "px";
+    seed.style.top = y + "px";
 
     seed.onclick = () => {
-      if (seed.classList.contains("removing")) return;
-
-      /* 播音效 */
-      sound.currentTime = 0;
-      sound.play();
+      popSound.currentTime = 0;
+      popSound.play();
 
       seed.classList.add("removing");
 
-      setTimeout(() => {
-        seed.remove();
-      }, 300);
+      setTimeout(() => seed.remove(), 300);
 
       removed++;
+      scoreText.innerText = removed;
 
-      if (removed === total) {
-        const time = ((Date.now() - startTime) / 1000).toFixed(1);
-        msg.innerText = "討伐完畢 ✔";
-        timerText.innerText = "花費時間：" + time + " 秒";
+      if (removed === TOTAL_SEEDS) {
+        clearInterval(interval);
+        alert("🎉 完成！用時：" + timer.toFixed(1) + " 秒");
       }
     };
 
@@ -142,16 +179,9 @@ function createSeeds() {
   }
 }
 
-/* ===== 開始遊戲 ===== */
-function startGame() {
-  msg.innerText = "";
-  timerText.innerText = "";
-  startTime = Date.now();
-  createSeeds();
-}
-
-/* 初始啟動 */
+/* 自動開始 */
 startGame();
+
 </script>
 
 </body>
