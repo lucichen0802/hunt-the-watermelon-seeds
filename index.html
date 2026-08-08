@@ -1,276 +1,105 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>討伐西瓜籽！</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            user-select: none; /* 防止連續點擊時選取到文字 */
-        }
+<meta charset="UTF-8">
+<title>討伐西瓜籽！</title>
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #f0f8ff;
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
+<style>
+body {
+  text-align: center;
+  font-family: sans-serif;
+}
 
-        /* 標題與計數器 */
-        .header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
+/* ===== 西瓜底圖 ===== */
+#melon {
+  width: 320px;
+  height: 220px;
+  margin: 20px auto;
+  position: relative;
 
-        h1 {
-            color: #d32f2f;
-            margin: 0 0 8px 0;
-            font-size: 24px;
-        }
+  /* ⭐⭐⭐ 這裡放你的「無籽西瓜圖片」 ⭐⭐⭐ */
+  background-image: url("https://i.meee.com.tw/8WJF4zu.png");
 
-        .counter-box {
-            font-size: 18px;
-            color: #333;
-            background: #fff;
-            padding: 8px 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  overflow: hidden;
+}
 
-        .remaining-count {
-            color: #d32f2f;
-            font-weight: bold;
-            font-size: 22px;
-        }
+/* ===== 籽（用圖片）===== */
+.seed {
+  width: 16px;
+  height: 22px;
 
-        /* 西瓜容器 */
-        .game-container {
-            position: relative;
-            width: 360px;
-            height: 360px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+  /* ⭐⭐⭐ 這裡放「西瓜籽PNG（透明背景）」 ⭐⭐⭐ */
+  background-image: url("https://i.meee.com.tw/r17sw0F.png");
 
-        /* 西瓜底圖 */
-        .watermelon-bg {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            /* 如果暫時沒有圖片，預設顯示一個紅肉綠皮西瓜樣式 */
-            background: radial-gradient(circle, #ff5252 65%, #4caf50 68%, #2e7d32 100%);
-            border-radius: 50%;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
+  background-size: contain;
+  background-repeat: no-repeat;
 
-        /* 西瓜籽圖片樣式 */
-        .seed {
-            position: absolute;
-            width: 28px;  /* 可根據你的籽圖片大小調整 */
-            height: 28px;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-            z-index: 10;
-        }
+  position: absolute;
+  cursor: pointer;
 
-        /* 滑鼠懸停時微放大，提示可點擊 */
-        .seed:hover {
-            transform: scale(1.25);
-        }
+  transition: transform 0.2s ease, opacity 0.3s ease;
+}
 
-        /* 被點擊挖出時的動畫效果 */
-        .seed.pop-out {
-            pointer-events: none;
-            animation: popAndFade 0.35s ease-out forwards;
-        }
-
-        @keyframes popAndFade {
-            0% {
-                transform: scale(1.2);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.8) translateY(-15px);
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(0) translateY(-30px);
-                opacity: 0;
-            }
-        }
-
-        /* 重置按鈕 */
-        .reset-btn {
-            margin-top: 25px;
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            background-color: #2e7d32;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
-            transition: all 0.2s ease;
-        }
-
-        .reset-btn:hover {
-            background-color: #1b5e20;
-            transform: translateY(-2px);
-        }
-
-        .reset-btn:active {
-            transform: translateY(0);
-        }
-
-        /* 通關提示 */
-        .victory-message {
-            position: absolute;
-            font-size: 28px;
-            font-weight: bold;
-            color: #2e7d32;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            display: none;
-            z-index: 20;
-            text-align: center;
-        }
-    </style>
+/* 點擊效果（比較像拿掉） */
+.seed.removing {
+  transform: scale(0.3);
+  opacity: 0;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="header">
-        <h1>西瓜籽清空大作戰</h1>
-        <div class="counter-box">
-            剩餘西瓜籽：<span id="seed-count" class="remaining-count">0</span> 顆
-        </div>
-    </div>
+<h2>討伐西瓜籽！把所有西瓜籽挖出來吧！</h2>
 
-    <div class="game-container" id="game-container">
-        <!-- 西瓜底圖：將 src 換成你的西瓜圖片檔名 -->
-        <img src="https://i.meee.com.tw/8WJF4zu.png" alt="西瓜底圖" class="watermelon-bg" onerror="this.style.display='none'">
-        
-        <div class="victory-message" id="victory-message">
-            ✨ 完美！一顆不剩！ ✨
-        </div>
-    </div>
+<div id="melon"></div>
+<p id="msg"></p>
 
-    <button class="reset-btn" onclick="generateSeeds()">重新擺滿西瓜籽（再次宣洩）</button>
+<script>
+const melon = document.getElementById("melon");
+const msg = document.getElementById("msg");
 
-    <script>
-        const container = document.getElementById('game-container');
-        const countDisplay = document.getElementById('seed-count');
-        const victoryMsg = document.getElementById('victory-message');
-        
-        // 設定要生成的西瓜籽數量
-        const TOTAL_SEEDS = 18; 
-        
-        // 你的西瓜籽圖片路徑（請改成你的圖檔名稱）
-        const SEED_IMAGE_SRC = 'https://i.meee.com.tw/r17sw0F.png';
+/* ⭐ 控制籽數量（建議先少） */
+let total = 5;
+let removed = 0;
 
-        let remainingSeeds = 0;
+/* ⭐ 籽的位置（手動放，比亂數更穩） */
+const positions = [
+  {top: 60, left: 120},
+  {top: 100, left: 200},
+  {top: 140, left: 80},
+  {top: 90, left: 160},
+  {top: 130, left: 220}
+];
 
-        // 產生簡短的爽快 Web Audio 挖籽音效（不需外部音效檔）
-        function playPopSound() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.08);
-                
-                gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
-                
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                
-                osc.start();
-                osc.stop(ctx.currentTime + 0.08);
-            } catch (e) {
-                // 部分瀏覽器尚未互動前禁止發聲，忽略錯誤
-            }
-        }
+positions.slice(0, total).forEach(pos => {
+  let seed = document.createElement("div");
+  seed.className = "seed";
 
-        function generateSeeds() {
-            // 清除舊的籽
-            const oldSeeds = document.querySelectorAll('.seed');
-            oldSeeds.forEach(seed => seed.remove());
-            
-            victoryMsg.style.display = 'none';
-            remainingSeeds = TOTAL_SEEDS;
-            countDisplay.textContent = remainingSeeds;
+  seed.style.top = pos.top + "px";
+  seed.style.left = pos.left + "px";
 
-            const radius = 130; // 籽散佈的圓形半徑範圍（可調整）
-            const centerX = 180; // 容器中心 X
-            const centerY = 180; // 容器中心 Y
+  seed.onclick = () => {
+    /* 加上「拿掉動畫」 */
+    seed.classList.add("removing");
 
-            for (let i = 0; i < TOTAL_SEEDS; i++) {
-                const seed = document.createElement('img');
-                
-                // 設定圖片來源，若載入失敗會顯示一顆預設黑籽
-                seed.src = SEED_IMAGE_SRC;
-                seed.classList.add('seed');
-                seed.onerror = function() {
-                    // 備用樣式：如果沒讀到 seed.png，會用小黑點代替
-                    this.style.backgroundColor = '#2c1810';
-                    this.style.borderRadius = '50% 50% 50% 50% / 60% 60% 40% 40%';
-                };
+    setTimeout(() => {
+      seed.remove();
+    }, 300);
 
-                // 隨機角度與距離，讓籽自然分布在西瓜肉上
-                const angle = Math.random() * Math.PI * 2;
-                const r = Math.sqrt(Math.random()) * radius; // 均勻分佈
+    removed++;
 
-                const x = centerX + r * Math.cos(angle) - 14; // 14 是籽寬度的一半
-                const y = centerY + r * Math.sin(angle) - 14;
+    if (removed === total) {
+      msg.innerText = "討伐完畢 ✔ 不要再想了";
+    }
+  };
 
-                // 隨機微幅旋轉角度，看起來更自然
-                const randomRotation = Math.floor(Math.random() * 360);
+  melon.appendChild(seed);
+});
+</script>
 
-                seed.style.left = `${x}px`;
-                seed.style.top = `${y}px`;
-                seed.style.transform = `rotate(${randomRotation}deg)`;
-
-                // 綁定點擊挖出事件
-                seed.addEventListener('click', function() {
-                    if (this.classList.contains('pop-out')) return;
-
-                    playPopSound();
-                    this.classList.add('pop-out');
-
-                    remainingSeeds--;
-                    countDisplay.textContent = remainingSeeds;
-
-                    setTimeout(() => {
-                        this.remove();
-                    }, 350);
-
-                    // 全部挖完
-                    if (remainingSeeds === 0) {
-                        setTimeout(() => {
-                            victoryMsg.style.display = 'block';
-                        }, 400);
-                    }
-                });
-
-                container.appendChild(seed);
-            }
-        }
-
-        // 初始化遊戲
-        window.onload = generateSeeds;
-    </script>
 </body>
 </html>
