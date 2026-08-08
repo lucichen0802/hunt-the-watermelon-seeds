@@ -84,8 +84,21 @@ function startGame() {
     seed.className = "seed";
 
     // ⭐隨機位置（限制在西瓜內）
-    let top = Math.random() * 180 + 10;
-    let left = Math.random() * 280 + 10;
+    let top, left;
+
+do {
+  top = Math.random() * (melonRect.height - seedHeight);
+  left = Math.random() * (melonRect.width - seedWidth);
+
+  // ⭐ 西瓜三角形限制（關鍵）
+  // 越上面範圍越窄
+  const centerX = melonRect.width / 2;
+  const distanceFromCenter = Math.abs(left - centerX);
+
+  // 允許寬度（越下面越寬）
+  const maxWidth = (top / melonRect.height) * centerX;
+
+} while (distanceFromCenter > maxWidth);
 
     seed.style.top = top + "px";
     seed.style.left = left + "px";
