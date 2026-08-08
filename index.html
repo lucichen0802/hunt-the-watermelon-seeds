@@ -10,20 +10,21 @@ body {
   font-family: sans-serif;
 }
 
-/* ===== 西瓜底圖 ===== */
+/* ===== 西瓜 ===== */
 #melon {
   width: 320px;
   height: 220px;
   margin: 20px auto;
   position: relative;
 
-  /* ⭐⭐⭐ ① 在這裡換「無籽西瓜圖片」 ⭐⭐⭐ */
+  /* ⭐⭐⭐ 改這裡（西瓜圖）⭐⭐⭐ */
   background-image: url("https://i.meee.com.tw/8WJF4zu.png");
 
   background-size: cover;
   background-position: center;
   border-radius: 12px;
-  overflow: hidden;
+
+  overflow: hidden; /* 防止籽跑出去 */
 }
 
 /* ===== 籽 ===== */
@@ -31,7 +32,7 @@ body {
   width: 16px;
   height: 22px;
 
-  /* ⭐⭐⭐ ② 在這裡換「籽 PNG 圖」 ⭐⭐⭐ */
+  /* ⭐⭐⭐ 改這裡（籽圖）⭐⭐⭐ */
   background-image: url("https://i.meee.com.tw/r17sw0F.png");
 
   background-size: contain;
@@ -49,16 +50,16 @@ body {
 }
 
 button {
+  margin-top: 10px;
   padding: 8px 16px;
   font-size: 16px;
-  cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<h2>討伐西瓜籽 🍉</h2>
+<h2>討伐西瓜籽！</h2>
 
 <div id="melon"></div>
 
@@ -70,38 +71,30 @@ button {
 const melon = document.getElementById("melon");
 const msg = document.getElementById("msg");
 
-let total = 8;   // ⭐籽數量（可自己改）
+let total = 8;
 let removed = 0;
 
-/* ===== 隨機生成籽 ===== */
+/* ⭐ 安全範圍（避免跑出去） */
+const PADDING = 20;
+
 function startGame() {
   melon.innerHTML = "";
-  removed = 0;
   msg.innerText = "";
+  removed = 0;
 
   for (let i = 0; i < total; i++) {
     let seed = document.createElement("div");
     seed.className = "seed";
 
-    // ⭐隨機位置（限制在西瓜內）
-    let top, left;
+    /* ⭐ 隨機位置（限制在西瓜內） */
+    let maxX = melon.clientWidth - 20 - PADDING;
+    let maxY = melon.clientHeight - 25 - PADDING;
 
-do {
-  top = Math.random() * (melonRect.height - seedHeight);
-  left = Math.random() * (melonRect.width - seedWidth);
+    let x = Math.random() * maxX + PADDING / 2;
+    let y = Math.random() * maxY + PADDING / 2;
 
-  // ⭐ 西瓜三角形限制（關鍵）
-  // 越上面範圍越窄
-  const centerX = melonRect.width / 2;
-  const distanceFromCenter = Math.abs(left - centerX);
-
-  // 允許寬度（越下面越寬）
-  const maxWidth = (top / melonRect.height) * centerX;
-
-} while (distanceFromCenter > maxWidth);
-
-    seed.style.top = top + "px";
-    seed.style.left = left + "px";
+    seed.style.left = x + "px";
+    seed.style.top = y + "px";
 
     seed.onclick = () => {
       seed.classList.add("removing");
@@ -113,7 +106,7 @@ do {
       removed++;
 
       if (removed === total) {
-        msg.innerText = "討伐完畢 ✔ 有舒服一點了嗎";
+        msg.innerText = "討伐完畢 ✔";
       }
     };
 
@@ -121,7 +114,7 @@ do {
   }
 }
 
-/* 初始啟動 */
+/* 一開始自動開始 */
 startGame();
 </script>
 
